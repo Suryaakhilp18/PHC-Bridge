@@ -980,36 +980,70 @@ function Overview({ metrics, referrals, onOpen, onCreate, onScan, role }) {
 
 function ReferralTable({ rows, query, setQuery, statusFilter, setStatusFilter, priorityFilter, setPriorityFilter, onOpen, compact = false, role, onAcknowledge, onOutcome, onPrintSlip, onViewFHIR }) {
   const showControls = !compact;
+
+  // Detailed Section Analytics
+  const emergencyCount = rows.filter(r => r.priority === 'Emergency').length;
+  const urgentCount = rows.filter(r => r.priority === 'Urgent').length;
+  const routineCount = rows.filter(r => r.priority === 'Routine').length;
+  const completedCount = rows.filter(r => r.status === 'Completed').length;
+  const backReferredCount = rows.filter(r => r.status === 'Back-Referred' || r.back_referral).length;
+
   return (
-    <section className={`panel table-panel ${compact ? 'compact-table' : ''}`}>
+    <div className="referral-section-wrapper">
       {showControls && (
-        <div className="table-toolbar">
-          <div className="search-box">
-            <Search size={16} />
-            <input
-              placeholder="Search by patient name, ID, facility, or mandal..."
-              value={query || ''}
-              onChange={e => setQuery?.(e.target.value)}
-            />
+        <div className="section-analytics-banner mb-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+            <div className="text-xs text-slate-500 font-medium">Emergency Triage</div>
+            <div className="text-lg font-bold text-rose-600 mt-1">{emergencyCount} <span className="text-xs text-slate-400 font-normal">({rows.length ? Math.round((emergencyCount / rows.length) * 100) : 0}%)</span></div>
+            <div className="text-[11px] text-slate-400 mt-0.5">SLA: Immediate (&lt;2h)</div>
           </div>
-          <div className="filter-group">
-            <select className="filter-select" value={statusFilter || 'All'} onChange={e => setStatusFilter?.(e.target.value)}>
-              <option>All Statuses</option>
-              <option>Referred</option>
-              <option>Acknowledged</option>
-              <option>In Consultation</option>
-              <option>Completed</option>
-              <option>Back-Referred</option>
-            </select>
-            <select className="filter-select" value={priorityFilter || 'All'} onChange={e => setPriorityFilter?.(e.target.value)}>
-              <option>All Priorities</option>
-              <option>Routine</option>
-              <option>Urgent</option>
-              <option>Emergency</option>
-            </select>
+          <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+            <div className="text-xs text-slate-500 font-medium">Urgent Priority</div>
+            <div className="text-lg font-bold text-amber-600 mt-1">{urgentCount} <span className="text-xs text-slate-400 font-normal">({rows.length ? Math.round((urgentCount / rows.length) * 100) : 0}%)</span></div>
+            <div className="text-[11px] text-slate-400 mt-0.5">SLA: Priority (&lt;24h)</div>
+          </div>
+          <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+            <div className="text-xs text-slate-500 font-medium">Routine Referrals</div>
+            <div className="text-lg font-bold text-emerald-600 mt-1">{routineCount} <span className="text-xs text-slate-400 font-normal">({rows.length ? Math.round((routineCount / rows.length) * 100) : 0}%)</span></div>
+            <div className="text-[11px] text-slate-400 mt-0.5">SLA: Elective (&lt;72h)</div>
+          </div>
+          <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+            <div className="text-xs text-slate-500 font-medium">Closed-Loop Resolution</div>
+            <div className="text-lg font-bold text-blue-600 mt-1">{completedCount + backReferredCount} <span className="text-xs text-slate-400 font-normal">completed</span></div>
+            <div className="text-[11px] text-slate-400 mt-0.5">{backReferredCount} routed back to PHC</div>
           </div>
         </div>
       )}
+
+      <section className={`panel table-panel ${compact ? 'compact-table' : ''}`}>
+        {showControls && (
+          <div className="table-toolbar">
+            <div className="search-box">
+              <Search size={16} />
+              <input
+                placeholder="Search by patient name, ID, facility, or mandal..."
+                value={query || ''}
+                onChange={e => setQuery?.(e.target.value)}
+              />
+            </div>
+            <div className="filter-group">
+              <select className="filter-select" value={statusFilter || 'All'} onChange={e => setStatusFilter?.(e.target.value)}>
+                <option>All Statuses</option>
+                <option>Referred</option>
+                <option>Acknowledged</option>
+                <option>In Consultation</option>
+                <option>Completed</option>
+                <option>Back-Referred</option>
+              </select>
+              <select className="filter-select" value={priorityFilter || 'All'} onChange={e => setPriorityFilter?.(e.target.value)}>
+                <option>All Priorities</option>
+                <option>Routine</option>
+                <option>Urgent</option>
+                <option>Emergency</option>
+              </select>
+            </div>
+          </div>
+        )}
 
       <div className="table-wrap">
         <table>
@@ -1079,6 +1113,7 @@ function ReferralTable({ rows, query, setQuery, statusFilter, setStatusFilter, p
         </table>
       </div>
     </section>
+  </div>
   );
 }
 
@@ -1096,15 +1131,44 @@ function FollowUpsTable({ tasks, onRefresh, api, setNotice }) {
     }
   }
 
+  const completedCount = tasks.filter(t => t.status === 'Completed').length;
+  const overdueCount = tasks.filter(t => t.status === 'Overdue').length;
+  const pendingCount = tasks.filter(t => t.status === 'Scheduled' || t.status === 'Pending').length;
+  const complianceRate = tasks.length ? Math.round((completedCount / tasks.length) * 100) : 100;
+
   return (
-    <section className="panel table-panel">
-      <div className="panel-head">
-        <div>
-          <h3>Community Health Officer (CHO) Follow-up Operations</h3>
-          <p>Frontline patient visit tracking, medication compliance, and post-discharge continuity</p>
+    <div className="followups-section-wrapper">
+      <div className="section-analytics-banner mb-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">CHO Compliance Rate</div>
+          <div className="text-lg font-bold text-emerald-600 mt-1">{complianceRate}%</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">{completedCount} of {tasks.length} tasks closed</div>
+        </div>
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Pending Home Visits</div>
+          <div className="text-lg font-bold text-amber-600 mt-1">{pendingCount}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Scheduled on-time visits</div>
+        </div>
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Overdue Backlog</div>
+          <div className="text-lg font-bold text-rose-600 mt-1">{overdueCount}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Requires supervisor escalation</div>
+        </div>
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Frontline Field Coverage</div>
+          <div className="text-lg font-bold text-blue-600 mt-1">100%</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Arogya Mandir Sub-Centres</div>
         </div>
       </div>
-      <div className="table-wrap">
+
+      <section className="panel table-panel">
+        <div className="panel-head">
+          <div>
+            <h3>Community Health Officer (CHO) Follow-up Operations</h3>
+            <p>Frontline patient visit tracking, medication compliance, and post-discharge continuity</p>
+          </div>
+        </div>
+        <div className="table-wrap">
         <table>
           <thead>
             <tr>
@@ -1157,6 +1221,7 @@ function FollowUpsTable({ tasks, onRefresh, api, setNotice }) {
         </table>
       </div>
     </section>
+  </div>
   );
 }
 

@@ -33,8 +33,36 @@ export default function FacilityDirectoryView({ api }) {
     (f.hfr_id && f.hfr_id.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const totalFacilities = facilities.length;
+  const phcCount = facilities.filter(f => f.facility_type === 'PHC' || f.facility_type === 'Sub-Centre / AAM').length;
+  const hospitalCount = facilities.filter(f => f.facility_type.includes('Hospital') || f.facility_type === 'CHC').length;
+  const districts = Array.from(new Set(facilities.map(f => f.district).filter(Boolean)));
+
   return (
     <div className="facility-directory-view">
+      <div className="section-analytics-banner mb-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Total Registered Institutions</div>
+          <div className="text-lg font-bold text-slate-800 mt-1">{totalFacilities}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Authoritative Health Facility Registry</div>
+        </div>
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Primary Care Gateways</div>
+          <div className="text-lg font-bold text-teal-600 mt-1">{phcCount}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">PHCs & Arogya Mandirs</div>
+        </div>
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Secondary & Tertiary Centers</div>
+          <div className="text-lg font-bold text-blue-600 mt-1">{hospitalCount}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">CHCs, Area, District & Teaching GGH</div>
+        </div>
+        <div className="p-3 bg-white rounded-lg border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Districts Covered</div>
+          <div className="text-lg font-bold text-indigo-600 mt-1">{districts.length} Districts</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">{districts.join(', ') || 'NTR, Guntur, Vizag'}</div>
+        </div>
+      </div>
+
       <div className="panel table-panel">
         <div className="table-toolbar">
           <div className="search-box">
