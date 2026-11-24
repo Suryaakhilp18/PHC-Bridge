@@ -1,99 +1,109 @@
-# PHC Bridge — Offline-First Referral Coordination Prototype
+# PHC Bridge 2.0 — AI-Powered Offline-First Care Coordination Platform
 
-A hackathon-ready web prototype for coordinating patient referrals between Primary Health Centres (PHCs) and district hospitals.
+An enterprise healthcare coordination platform connecting Primary Health Centres (PHCs), District Hospitals, Community Health Officers (CHOs), and Health Administrators across the complete patient referral lifecycle.
 
-## Included
-- Role-based demo access: PHC doctor, hospital doctor, community health officer, administrator
-- Patient registration and digital referral creation
-- Unique referral IDs and QR-code display
-- Hospital acknowledgement and consultation outcome updates
-- Back-referral and follow-up task workflow
-- Referral timeline / audit events
-- Dashboard metrics and search
-- Offline referral queue in browser `localStorage`, with a manual sync action
-- FastAPI backend with SQLAlchemy; SQLite works out of the box and PostgreSQL is configurable
+---
 
-> **Safety:** This is a demonstration prototype. It uses synthetic patient information only. It does not diagnose, prescribe, or replace clinical decisions. Do not enter real patient data. Authentication, authorization, encryption, audit integrity, clinical governance, and privacy controls require hardening before any real-world deployment.
+## 🌟 Key Capabilities in PHC Bridge 2.0
 
-## Requirements
-- Python 3.10+
+- **Complete Care Coordination Lifecycle:**
+  `Patient Registration` ➔ `Digital Referral Creation` ➔ `Tamper-Proof QR Generation` ➔ `Hospital Triage Scan` ➔ `Acknowledgment` ➔ `Specialist Outcome` ➔ `Back-Referral Established` ➔ `CHO Follow-up Closure`.
+- **Offline-First PWA with IndexedDB Sync:**
+  Clinicians in remote or bandwidth-constrained health sub-centres can draft and create referrals completely offline. Queued records are stored in browser IndexedDB with automatic background synchronization upon network reconnection.
+- **AI Intelligence Engine:**
+  - **AI Referral Quality Assistant:** Pre-submission analysis flagging missing clinical context, urgency level mismatches, and suggesting clear administrative wording.
+  - **AI Patient Journey Summarizer:** Synthesizes verified timeline facts vs administrative narratives for returning patients.
+  - **AI Healthcare Operations Assistant:** Conversational query engine for administrators backed by real SQL database aggregates.
+  - **Multilingual Communication Aid:** Instant translation of administrative follow-up instructions into Telugu (తెలుగు) and Hindi (हिंदी).
+- **Security & Role-Based Access Control (RBAC):**
+  - PBKDF2-HMAC-SHA256 password security.
+  - JWT tokens with 24-hour expiration and server-side invalidation.
+  - Scoped role permissions (`phc`, `hospital`, `cho`, `admin`).
+  - Tamper-proof HMAC-signed QR identification codes (zero unencrypted patient health information embedded in QR).
+- **Printable Referral Slip & QR Slip:**
+  Export and print official 80mm / A4 referral slips with scannable QR tokens for patients traveling between facilities.
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Prerequisites
+- Python 3.10+ (tested on Python 3.14)
 - Node.js 18+
 
-## 1. Start the backend
-
+### 2. Start the Backend API Server
 ```bash
+# Navigate to backend directory
 cd backend
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
 
-pip install -r requirements.txt
-uvicorn app:app --reload
+# (Optional) Activate your virtual environment
+# Windows: ..\.venv\Scripts\activate
+# Linux/macOS: source ../.venv/bin/activate
+
+# Start Uvicorn server with hot-reload
+python -m uvicorn app:app --host 127.0.0.1 --port 8000 --reload
 ```
+- API Base URL: `http://localhost:8000`
+- Interactive Swagger Documentation: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/`
 
-API: http://localhost:8000  
-Swagger docs: http://localhost:8000/docs
-
-The backend defaults to SQLite (`phc_bridge.db`). To use PostgreSQL, set `DATABASE_URL`, for example:
-
+### 3. Start the Frontend Development Server
+Open a second terminal window:
 ```bash
-# PowerShell
-$env:DATABASE_URL="postgresql+psycopg://postgres:password@localhost:5432/phc_bridge"
-
-# macOS/Linux
-export DATABASE_URL="postgresql+psycopg://postgres:password@localhost:5432/phc_bridge"
-```
-
-## 2. Start the frontend
-
-Open a second terminal:
-
-```bash
+# Navigate to frontend directory
 cd frontend
-npm install
+
+# Start Vite dev server
 npm run dev
 ```
+- Open your browser at `http://localhost:5173`
 
-Open the URL printed by Vite (usually http://localhost:5173).
+---
 
-Set `VITE_API_URL` if the backend is hosted elsewhere. By default the frontend uses `http://localhost:8000`.
+## 👥 Authorized Demonstration Roles
 
-## Demo roles
-Choose any role on the sign-in screen. The demo does not require a password.
+Choose any role on the sign-in screen (or log in with username and password `demo123`):
 
-- **PHC Doctor:** create and send referrals
-- **Hospital Doctor:** acknowledge referrals, record consultation outcomes, create back-referrals
-- **Community Health Officer:** manage follow-up tasks
-- **Administrator:** view all workflows and operational metrics
+| Role | Demo User | Facility | Responsibilities |
+| :--- | :--- | :--- | :--- |
+| **PHC Doctor** | Dr. Meera Rao (`phc`) | Lakshmi Nagar PHC | Register patients, create referrals with AI quality review, print slips |
+| **Hospital Doctor** | Dr. Arjun Kumar (`hospital`) | District General Hospital | Scan referral QR code, acknowledge handoff, record consultation outcome, trigger back-referral |
+| **CHO** | Sravani (`cho`) | Lakshmi Nagar PHC | View follow-up tasks, conduct home visits, update adherence notes, mark follow-ups complete |
+| **Administrator** | System Administrator (`admin`) | District Health Office | Network analytics, facility workloads, system audit log, CSV export, AI Operations Assistant |
 
-The app seeds a few clearly fictional demo records on first backend startup.
+---
 
-## Offline demonstration
-1. Open the app while the backend is available.
-2. Use the PHC Doctor role and create a referral.
-3. If the API is unavailable, the browser stores the referral locally as `PENDING SYNC`.
-4. Restore the backend and click **Sync offline queue** in the sidebar.
-5. The app submits queued referrals and refreshes the dashboard.
+## 🧪 Running the Automated Test Suite
 
-For a reliable demo, test this flow in a browser with DevTools Network set to Offline.
+PHC Bridge 2.0 comes with full automated unit and end-to-end integration tests:
 
-## Project structure
-
-```text
-phc-bridge/
-├── backend/
-│   ├── app.py
-│   └── requirements.txt
-└── frontend/
-    ├── index.html
-    ├── package.json
-    └── src/
-        ├── main.jsx
-        ├── App.jsx
-        └── styles.css
+```bash
+# From the project root
+python -m pytest tests/ -v
 ```
 
-## Before any pilot
-Replace demo authentication with a vetted identity provider; add granular permissions, consent and lawful-basis review, encryption in transit/at rest, secure secrets, tamper-evident audit logging, backups, retention policies, accessibility testing, threat modelling, and integration with approved health systems. Validate all workflows with clinicians and administrators.
+All 6 test suites cover:
+1. `test_health_check` — Service health & API discovery
+2. `test_login_flow` — JWT token generation & credentials verification
+3. `test_referrals_and_qr_scanning` — Referral creation, QR signing & camera scan verification
+4. `test_ai_modules` — AI Quality Review, Journey Summarizer, Operations Assistant, and Translation
+5. `test_offline_sync` — IndexedDB bulk offline synchronization with duplicate protection
+6. `test_complete_end_to_end_referral_journey` — Complete end-to-end multi-role lifecycle test
+
+---
+
+## 📶 Testing Offline Mode
+
+1. Open the application at `http://localhost:5173`.
+2. Sign in as **PHC Doctor**.
+3. Open browser DevTools (`F12`), switch to the **Network** tab, and toggle the dropdown from *No throttling* to **Offline**.
+4. Click **Create Referral**, enter synthetic patient information, and click **Dispatch Referral**.
+5. Observe the notification: *"Saved locally in IndexedDB. Will sync automatically when connectivity returns."*
+6. In DevTools, toggle Network back to **Online** (or click the **Sync Offline Queue** button in the sidebar).
+7. The referral is uploaded to the central server, assigned a unique ID, and seeded into the hospital receiving queue.
+
+---
+
+## 🛡️ Safety & Clinical Disclaimer
+
+**Synthetic Demo Environment:** PHC Bridge uses synthetic patient information only. It does not diagnose, prescribe, or replace clinical decision-making. Before any real-world pilot, integrate with approved health information networks (e.g. ABDM), enforce mutual TLS, encrypted storage at rest, and clinical governance audits.

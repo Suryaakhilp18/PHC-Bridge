@@ -1,0 +1,22 @@
+{
+  "short_name": "PHC Bridge",
+  "name": "PHC Bridge — Patient Referral Coordination",
+  "description": "AI-Powered Offline-First Healthcare Referral & Continuity-of-Care Coordination Platform",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0ea5e9",
+  "display": "standalone",
+  "orientation": "portrait"
+}
